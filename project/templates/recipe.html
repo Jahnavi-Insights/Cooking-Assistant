@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipes - AI Cooking Assistant</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+      body {
+        background-color: #aa87bb;
+        font-family: "Inter", sans-serif;
+      }
+      .recipe-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .recipe-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+      .modal {
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      .recipe-detail-modal {
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
+        Explore Indian Dishes
+      </h1>
+
+      <div id="recipeGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Recipes will be dynamically inserted here -->
+      </div>
+    </div>
+
+  <div id="recipeGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Recipes will be dynamically inserted here -->
+  </div>
+</div>
+    <!-- Recipe Detail Modal -->
+    <div
+      id="recipeModal"
+      class="fixed inset-0 z-50 hidden items-center justify-center modal"
+    >
+      <div
+        class="bg-white w-11/12 md:w-3/4 lg:w-2/3 rounded-xl shadow-2xl recipe-detail-modal max-h-screen overflow-y-auto"
+      >
+        <div id="recipeModalContent" class="p-8">
+          <!-- Dynamic recipe content will be inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Sample Recipes Data
+      const recipes = [
+        {
+          name: "Butter Chicken",
+          description: "Creamy tomato-based curry with tender chicken",
+          image: "/static/images/butter-chicken.jpg",
+          ingredients: [
+            "Chicken thighs",
+            "Tomato puree",
+            "Heavy cream",
+            "Butter",
+            "Garam masala",
+            "Yogurt",
+            "Garlic",
+            "Ginger",
+          ],
+          steps: [
+            "Marinate chicken in yogurt and spices for 2 hours",
+            "Grill or roast the marinated chicken until cooked",
+            "Prepare a rich tomato and cream-based sauce",
+            "Simmer chicken in the sauce until heated through",
+            "Garnish with fresh cream and cilantro",
+          ],
+          nutrition: {
+            Calories: "380 kcal",
+            Protein: "25g",
+            Carbohydrates: "10g",
+            Fat: "28g",
+          },
+          time: {
+            Prep: "30 minutes",
+            Cook: "45 minutes",
+            Total: "1 hour 15 minutes",
+          },
+        },
+
+        {
+          name: "Aloo Paratha",
+          description:
+            "Whole wheat flatbread stuffed with spiced potato filling",
+          image: "/static/images/aloo-paratha.jpg",
+          ingredients: [
+            "Whole wheat flour",
+            "Potatoes",
+            "Green chilies",
+            "Cumin seeds",
+            "Coriander leaves",
+            "Salt",
+            "Oil or ghee",
+            "Butter for serving",
+          ],
+          steps: [
+            "Boil and mash potatoes",
+            "Mix mashed potatoes with spices and herbs",
+            "Prepare wheat dough and divide into portions",
+            "Stuff dough with potato mixture",
+            "Roll out stuffed parathas",
+            "Cook on hot griddle with ghee until golden brown",
+            "Serve hot with yogurt or pickle",
+          ],
+          nutrition: {
+            Calories: "280 kcal",
+            Protein: "8g",
+            Carbohydrates: "45g",
+            Fat: "10g",
+          },
+          time: {
+            Prep: "20 minutes",
+            Cook: "25 minutes",
+            Total: "45 minutes",
+          },
+        },
+        {
+          name: "Chicken Biryani",
+          description:
+            "Fragrant rice dish with marinated chicken and aromatic spices",
+          image: "/static/images/chicken-biryani.jpg",
+          ingredients: [
+            "Basmati rice",
+            "Chicken pieces",
+            "Onions",
+            "Yogurt",
+            "Biryani masala",
+            "Saffron",
+            "Mint leaves",
+            "Coriander leaves",
+            "Ghee",
+            "Whole spices",
+          ],
+          steps: [
+            "Marinate chicken in yogurt and spices",
+            "Par-boil basmati rice",
+            "Layer marinated chicken and partially cooked rice",
+            "Add saffron milk and fried onions",
+            "Cook on dum (slow heat) until rice is fully cooked",
+            "Garnish with fresh herbs",
+          ],
+          nutrition: {
+            Calories: "420 kcal",
+            Protein: "30g",
+            Carbohydrates: "50g",
+            Fat: "15g",
+          },
+          time: {
+            Prep: "45 minutes",
+            Cook: "1 hour",
+            Total: "1 hour 45 minutes",
+          },
+        },
+        {
+          name: "Chole",
+          description: "Spicy North Indian chickpea curry",
+          image: "/static/images/chole.jpg",
+          ingredients: [
+            "Chickpeas",
+            "Onions",
+            "Tomatoes",
+            "Ginger-garlic paste",
+            "Chole masala",
+            "Cumin seeds",
+            "Turmeric",
+            "Cilantro",
+          ],
+          steps: [
+            "Soak chickpeas overnight",
+            "Boil chickpeas until tender",
+            "Prepare onion-tomato base",
+            "Add spices and boiled chickpeas",
+            "Simmer until gravy thickens",
+            "Garnish with fresh cilantro",
+          ],
+          nutrition: {
+            Calories: "250 kcal",
+            Protein: "15g",
+            Carbohydrates: "40g",
+            Fat: "8g",
+          },
+          time: {
+            Prep: "12 hours (soaking)",
+            Cook: "45 minutes",
+            Total: "13 hours",
+          },
+        },
+        {
+          name: "Dal Tadka",
+          description: "Tempered yellow lentil dish with spicy seasoning",
+          image: "/static/images/dal-tadka.jpg",
+          ingredients: [
+            "Yellow lentils",
+            "Ghee",
+            "Cumin seeds",
+            "Garlic",
+            "Green chilies",
+            "Turmeric",
+            "Red chili powder",
+            "Cilantro",
+          ],
+          steps: [
+            "Cook yellow lentils until soft",
+            "Prepare tempering with ghee, cumin, and garlic",
+            "Pour hot tempering over cooked lentils",
+            "Mix well and garnish with cilantro",
+          ],
+          nutrition: {
+            Calories: "180 kcal",
+            Protein: "12g",
+            Carbohydrates: "30g",
+            Fat: "5g",
+          },
+          time: {
+            Prep: "15 minutes",
+            Cook: "30 minutes",
+            Total: "45 minutes",
+          },
+        },
+        {
+          name: "Masala Dosa",
+          description:
+            "Crispy fermented rice and lentil crepe with potato filling",
+          image: "/static/images/masala-dosa.jpg",
+          ingredients: [
+            "Rice",
+            "Lentils",
+            "Potatoes",
+            "Onions",
+            "Mustard seeds",
+            "Curry leaves",
+            "Green chilies",
+            "Coconut chutney",
+          ],
+          steps: [
+            "Soak rice and lentils",
+            "Ferment batter overnight",
+            "Prepare potato masala filling",
+            "Make thin, crispy dosas",
+            "Fill with potato masala",
+            "Serve with coconut chutney and sambar",
+          ],
+          nutrition: {
+            Calories: "320 kcal",
+            Protein: "10g",
+            Carbohydrates: "55g",
+            Fat: "10g",
+          },
+          time: {
+            Prep: "12 hours (fermentation)",
+            Cook: "30 minutes",
+            Total: "13 hours",
+          },
+        },
+        {
+          name: "Paneer Butter Masala",
+          description: "Creamy cottage cheese curry in rich tomato gravy",
+          image: "/static/images/paneer-butter-masala.jpg",
+          ingredients: [
+            "Paneer",
+            "Tomatoes",
+            "Cream",
+            "Butter",
+            "Ginger-garlic paste",
+            "Kasuri methi",
+            "Garam masala",
+            "Cashew paste",
+          ],
+          steps: [
+            "Prepare tomato-based gravy",
+            "Add cashew and cream paste",
+            "Season with spices",
+            "Add paneer cubes",
+            "Simmer until flavors meld",
+            "Garnish with cream and kasuri methi",
+          ],
+          nutrition: {
+            Calories: "350 kcal",
+            Protein: "15g",
+            Carbohydrates: "15g",
+            Fat: "25g",
+          },
+          time: {
+            Prep: "20 minutes",
+            Cook: "30 minutes",
+            Total: "50 minutes",
+          },
+        },
+        {
+          name: "Pav Bhaji",
+          description: "Spicy vegetable mash served with buttered bread rolls",
+          image: "/static/images/pav-bhaji.jpg",
+          ingredients: [
+            "Mixed vegetables",
+            "Potatoes",
+            "Tomatoes",
+            "Butter",
+            "Pav (bread rolls)",
+            "Onions",
+            "Ginger-garlic paste",
+            "Pav bhaji masala",
+          ],
+          steps: [
+            "Boil and mash mixed vegetables",
+            "Prepare spicy vegetable base",
+            "Mash vegetables thoroughly",
+            "Cook with butter and spices",
+            "Toast pav with butter",
+            "Serve bhaji with hot, buttered pav",
+          ],
+          nutrition: {
+            Calories: "280 kcal",
+            Protein: "8g",
+            Carbohydrates: "40g",
+            Fat: "12g",
+          },
+          time: {
+            Prep: "20 minutes",
+            Cook: "30 minutes",
+            Total: "50 minutes",
+          },
+        },
+        {
+          name: "Rajma",
+          description: "Punjabi-style red kidney bean curry",
+          image: "/static/images/rajma.jpg",
+          ingredients: [
+            "Red kidney beans",
+            "Onions",
+            "Tomatoes",
+            "Ginger-garlic paste",
+            "Cumin seeds",
+            "Rajma masala",
+            "Cilantro",
+          ],
+          steps: [
+            "Soak kidney beans overnight",
+            "Boil beans until tender",
+            "Prepare onion-tomato base",
+            "Add boiled beans and spices",
+            "Simmer until gravy thickens",
+            "Garnish with fresh cilantro",
+          ],
+          nutrition: {
+            Calories: "270 kcal",
+            Protein: "18g",
+            Carbohydrates: "45g",
+            Fat: "6g",
+          },
+          time: {
+            Prep: "12 hours (soaking)",
+            Cook: "45 minutes",
+            Total: "13 hours",
+          },
+        },
+        {
+          name: "Samosa",
+          description:
+            "Crispy pastry filled with spiced potato and pea mixture",
+          image: "/static/images/samosa.jpg",
+          ingredients: [
+            "All-purpose flour",
+            "Potatoes",
+            "Green peas",
+            "Cumin seeds",
+            "Green chilies",
+            "Coriander leaves",
+            "Oil for frying",
+            "Mint chutney",
+          ],
+          steps: [
+            "Prepare crisp pastry dough",
+            "Make spiced potato-pea filling",
+            "Shape dough into triangular pastries",
+            "Fill with potato mixture",
+            "Deep fry until golden brown",
+            "Serve hot with mint chutney",
+          ],
+          nutrition: {
+            Calories: "250 kcal",
+            Protein: "5g",
+            Carbohydrates: "35g",
+            Fat: "12g",
+          },
+          time: {
+            Prep: "30 minutes",
+            Cook: "20 minutes",
+            Total: "50 minutes",
+          },
+        },
+      ];
+      // Add more recipes here...
+      // Render Recipe Grid
+      function renderRecipeGrid() {
+        const grid = document.getElementById("recipeGrid");
+        recipes.forEach((recipe, index) => {
+          const recipeCard = document.createElement("div");
+          recipeCard.className =
+            "recipe-card bg-white rounded-xl overflow-hidden shadow-md cursor-pointer hover:shadow-lg transform transition duration-300 hover:scale-105";
+          recipeCard.innerHTML = `
+                    <img src="${recipe.image}" alt="${recipe.name}" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold mb-2">${recipe.name}</h3>
+                        <p class="text-gray-600 mb-4">${recipe.description}</p>
+                        <button onclick="openRecipeModal(${index})" class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition duration-300">
+                            View Recipe
+                        </button>
+                    </div>
+                `;
+          grid.appendChild(recipeCard);
+        });
+      }
+
+      // Open Recipe Modal
+      function openRecipeModal(index) {
+        const recipe = recipes[index];
+        const modalContent = document.getElementById("recipeModalContent");
+        modalContent.innerHTML = `
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/2 mb-6 md:mr-8">
+                        <img src="${recipe.image}" alt="${
+          recipe.name
+        }" class="w-full rounded-xl shadow-lg">
+                    </div>
+                    <div class="md:w-1/2">
+                        <h2 class="text-3xl font-bold mb-4">${recipe.name}</h2>
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold mb-2">Ingredients</h3>
+                            <ul class="list-disc list-inside">
+                                ${recipe.ingredients
+                                  .map((ing) => `<li>${ing}</li>`)
+                                  .join("")}
+                            </ul>
+                        </div>
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold mb-2">Recipe Steps</h3>
+                            ${recipe.steps
+                              .map(
+                                (step, i) => `
+                                <div class="flex items-center mb-2">
+                                    <span class="mr-3 text-blue-500 font-bold">${
+                                      i + 1
+                                    }.</span>
+                                    <span>${step}</span>
+                                </div>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2">Nutrition</h3>
+                                ${Object.entries(recipe.nutrition)
+                                  .map(
+                                    ([key, value]) => `
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">${key}:</span>
+                                        <span>${value}</span>
+                                    </div>
+                                `
+                                  )
+                                  .join("")}
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2">Time</h3>
+                                ${Object.entries(recipe.time)
+                                  .map(
+                                    ([key, value]) => `
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">${key}:</span>
+                                        <span>${value}</span>
+                                    </div>
+                                `
+                                  )
+                                  .join("")}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closeRecipeModal()" class="mt-6 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300">
+                    Close
+                </button>
+            `;
+
+        const modal = document.getElementById("recipeModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      // Close Recipe Modal
+      function closeRecipeModal() {
+        const modal = document.getElementById("recipeModal");
+        modal.classList.remove("flex");
+        modal.classList.add("hidden");
+      }
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", renderRecipeGrid);
+    </script>
+  </body>
+</html>
